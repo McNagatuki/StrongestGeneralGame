@@ -147,11 +147,6 @@ public class TeamManager {
         return scoreboard.getPlayerTeam(fallenWarriorTeamName);
     }
 
-    // 死亡時にチーム名を操作し、どのチームがどうなったかをたどれるようにする
-    // これにより、「ゲーム終了時にどう攻略されたか知る」と「途中鯖から抜けていた人が再ログイン時に処理をうける」ことができる
-    // 「途中鯖から抜けていた人が再ログイン時に処理をうける」
-    // ＝ 現所属チームにリーダーがいるか確認、いなければ履歴をたどって別のチームへ移動
-    // ＝ これを繰り返して、チームに**スペクテイターとして**復帰する
     // TODO: 「ゲーム終了時にどう攻略されたか知る」
 //    @SubscribeEvent
 //    public static void onPlayerLoggedInEvent(PlayerLoggedInEvent event) {
