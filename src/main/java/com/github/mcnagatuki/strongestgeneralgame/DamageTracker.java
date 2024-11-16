@@ -79,11 +79,11 @@ public class DamageTracker {
      * @param timestampNanoTime    ダメージを受けた時間
      * @param attackerName ダメージを与えたプレイヤーの名前
      */ // ダメージ記録を保持するクラス
-        public record DamageRecord(long timestampNanoTime, String attackerName) {
-            // ダメージ発生から現在時刻までの経過時間（秒単位）を取得
-            public double getDurationInSeconds() {
-                long durationNano = System.nanoTime() - timestampNanoTime;  // 経過時間（ナノ秒単位）
-                return ((double) durationNano) * 1e-9;  // 秒単位に変換して返す
-            }
+    public record DamageRecord(long timestampNanoTime, String attackerName) {
+        // ダメージ発生から現在時刻までの経過時間（秒単位）を取得
+        public double getDurationInSeconds() {
+            long durationNano = System.nanoTime() - timestampNanoTime;  // 経過時間（ナノ秒単位）
+            return ((double) durationNano) * 1e-9;  // 秒単位に変換して返す
+        }
     }
 }
