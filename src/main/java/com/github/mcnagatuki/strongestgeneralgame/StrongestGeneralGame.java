@@ -69,11 +69,7 @@ public class StrongestGeneralGame {
     // Define mod id in a common place for everything to reference
     public static final String MODID = "strongestgeneralgame";
 
-    // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
-
-//    public static final CommandManager commandManager = new CommandManager();
-//    public static final MainLogic mainLogic = new MainLogic();
 
     public StrongestGeneralGame()
     {
@@ -89,7 +85,7 @@ public class StrongestGeneralGame {
 //        MinecraftForge.EVENT_BUS.register(StrongestGeneralGame.mainLogic);
 
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, com.github.mcnagatuki.strongestgeneralgame.Config.SPEC);
+        // ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, com.github.mcnagatuki.strongestgeneralgame.Config.SPEC);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -110,7 +106,7 @@ public class StrongestGeneralGame {
     public void onServerStarting(ServerStartingEvent event)
     {
         // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
+//        LOGGER.info("HELLO from server starting");
     }
 
 //    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
