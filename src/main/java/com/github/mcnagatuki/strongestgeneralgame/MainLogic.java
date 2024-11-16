@@ -133,7 +133,8 @@ public class MainLogic {
         deathPlayerTeamMembers.forEach(e -> e.addTag(commandGeneralDeathAnnounceTag));
 
         // 死因がSGGプレイヤーによるものではない場合
-        if (killerTeam.isEmpty()) {
+        // あるいは、殺したチームが死んだチームと同じ場合（自殺？や相打ち）
+        if (killerTeam.isEmpty() || killerTeam.get().getName().equals(deathPlayerTeam.getName())) {
             // チームの全プレイヤーを落ち武者化
             TeamManager.moveTeamToFallenWarrior(server, deathPlayerTeam);
 
