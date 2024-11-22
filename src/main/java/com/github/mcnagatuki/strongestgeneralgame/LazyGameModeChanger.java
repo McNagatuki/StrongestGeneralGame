@@ -155,7 +155,7 @@ public class LazyGameModeChanger {
             double z = serverPlayer.getZ();
 
             SoundEvent sound = SoundEvents.ANVIL_PLACE;
-            float volume = 0.5F;
+            float volume = 0.4F;
             float pitch = 1.7F;
             long seed = System.nanoTime();
 
