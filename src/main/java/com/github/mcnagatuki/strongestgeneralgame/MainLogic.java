@@ -336,11 +336,6 @@ public class MainLogic {
             return;
         }
 
-//        // TODO: これあっている？
-//        if (!serverPlayer.isAlive()) {
-//            return;
-//        }
-
         // リスポーンタグを取得
         Optional<String> respawnTag = serverPlayer.getTags().stream().filter(e -> e.startsWith(respawnTpTagPrefix)).findFirst();
         if (respawnTag.isEmpty()) {
@@ -426,59 +421,4 @@ public class MainLogic {
             LazyGameModeChanger.register(serverPlayer, 5);
         }
     }
-
-    //    public static void gameRespawnPlayersAroundTeamMember(List<Player> players, Team targetTeam) {
-//        // たぶんカウントダウン処理が重くなるので、リスポーン処理はまとめてやった方がいい。
-//
-//        if (players.isEmpty()){
-//            return;
-//        }
-//
-//        // ServerPlayerのみで動作。すなわち、このMODはクライアントでは動かないはず。
-//        if (players.stream().anyMatch(e -> !(e instanceof ServerPlayer))){
-//            return;
-//        }
-//
-//        List<ServerPlayer> serverPlayers = players.stream().map(e -> (ServerPlayer) e).toList();
-//        serverPlayers.forEach(e -> e.setGameMode(GameType.SPECTATOR));  // スペクテイターに変更
-//        serverPlayers.stream().filter(LivingEntity::isAlive).forEach(Player::respawn);  // 死んでいたら強制復活
-//
-//        // tp先候補のプレイヤーを一覧で取得
-//        MinecraftServer server = serverPlayers.get(0).getServer();
-//        List<Player> teamPlayers = getTeamPlayers(server, targetTeam);
-//
-//        // tp
-//        for (ServerPlayer serverPlayer : serverPlayers) {
-//            Player tpDistPlayer = getRandomElement(teamPlayers);
-//            BlockPos tpDist = tpDistPlayer.getOnPos();
-//            serverPlayer.setPos(tpDist.getCenter());
-//        }
-//
-//        // TODO: カウントダウン処理中に大将がやられてしまった時の対処
-//
-//        // 5秒待機, カウントダウン付き
-//        int countDownTimeSec = 5;
-//        executorService.get().
-//                3wscheduleAtFixedRate(() -> {
-//            for (int i = countDownTimeSec; i > 0; i--) {
-//                // チャットにカウントダウンを表示
-//                String text = "リスポーンまで、あと" + String.valueOf(i) + "秒";
-//                Component textComponent = Component.literal(text);
-//                serverPlayers.forEach(e -> e.sendSystemMessage(textComponent));
-//
-//                // 音を鳴らす（プレイヤーの近くで音を出す）
-//                serverPlayers.forEach(e -> e.playSound(SoundEvents.LEVER_CLICK, 0.3F, 1.0F));
-//
-//                // 1秒待つ
-//                try {
-//                    TimeUnit.SECONDS.sleep(1);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            serverPlayers.forEach(e -> e.setGameMode(GameType.SURVIVAL));  // サバイバルに変更
-//        }, 0, 1, TimeUnit.SECONDS);
-//
-//    }
 }
