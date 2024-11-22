@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -42,19 +43,31 @@ public class CommandManager {
 
     public static int executeInitialize(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
-        MainLogic.initializeGame(source);
+        if (source.hasPermission(2) || !source.isPlayer()) {
+            MainLogic.initializeGame(source);
+        } else {
+            source.sendFailure(Component.literal("[SGG] Permission denied."));
+        }
         return Command.SINGLE_SUCCESS;
     }
 
     public static int executeStart(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
-        MainLogic.startGame(source);
+        if (source.hasPermission(2) || !source.isPlayer()) {
+            MainLogic.startGame(source);
+        } else {
+            source.sendFailure(Component.literal("[SGG] Permission denied."));
+        }
         return Command.SINGLE_SUCCESS;
     }
 
     public static int executeStop(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
-        MainLogic.endGame(source);
+        if (source.hasPermission(2) || !source.isPlayer()) {
+            MainLogic.endGame(source);
+        } else {
+            source.sendFailure(Component.literal("[SGG] Permission denied."));
+        }
         return Command.SINGLE_SUCCESS;
     }
 }
