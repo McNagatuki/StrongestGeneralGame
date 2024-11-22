@@ -12,13 +12,12 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Mod.EventBusSubscriber(modid = StrongestGeneralGame.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.DEDICATED_SERVER)
-public class LazyGameModeChange {
+public class LazyGameModeChanger {
     private static String lazyCounter = "sgg_lazy_game_mode_change";
 
     private static Map<String, Long> lastTickEvent = new HashMap<>();
