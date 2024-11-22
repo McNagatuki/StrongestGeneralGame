@@ -2,7 +2,6 @@ package com.github.mcnagatuki.strongestgeneralgame;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -16,7 +15,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
 import net.minecraft.world.scores.Team;
@@ -24,12 +22,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -37,7 +32,6 @@ import java.util.stream.Collectors;
 @Mod.EventBusSubscriber(modid = StrongestGeneralGame.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.DEDICATED_SERVER)
 public class MainLogic {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Supplier<ExecutorService> executorService = Executors::newSingleThreadScheduledExecutor;
     private static boolean running = false;
 
     // ワールド内コマンド操作用tag, このtagを通じて、コマンドの対象操作であることを伝達する。
