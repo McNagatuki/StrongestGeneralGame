@@ -1,10 +1,17 @@
 package com.github.mcnagatuki.strongestgeneralgame;
 
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -15,6 +22,8 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.ibm.icu.text.PluralRules.Operand.e;
 
 @Mod.EventBusSubscriber(modid = StrongestGeneralGame.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.DEDICATED_SERVER)
 public class LazyGameModeChanger {
@@ -123,8 +132,35 @@ public class LazyGameModeChanger {
         if (counterTime > 0) {
             String text = "リスポーンまで、" + String.valueOf(counterTime) + "秒";
             serverPlayer.sendSystemMessage(Component.literal(text));
+
+            // playsound minecraft:block.note_block.hat master @s ~ ~ ~ 10 1
+            double x = serverPlayer.getX();
+            double y = serverPlayer.getY();
+            double z = serverPlayer.getZ();
+
+            SoundEvent sound = SoundEvents.NOTE_BLOCK_HAT.get();
+            float volume = 0.5F;
+            float pitch = 1F;
+            long seed = System.nanoTime();
+
+            Packet<?> soundPacket = new ClientboundSoundPacket(Holder.direct(sound), SoundSource.PLAYERS, x, y, z, volume, pitch, seed);
+            serverPlayer.connection.send(soundPacket);
+
         } else {
             serverPlayer.setGameMode(GameType.SURVIVAL);
+
+            // playsound minecraft:block.anvil.place master @s ~ ~ ~ 10 1.7
+            double x = serverPlayer.getX();
+            double y = serverPlayer.getY();
+            double z = serverPlayer.getZ();
+
+            SoundEvent sound = SoundEvents.ANVIL_PLACE;
+            float volume = 0.5F;
+            float pitch = 1.7F;
+            long seed = System.nanoTime();
+
+            Packet<?> soundPacket = new ClientboundSoundPacket(Holder.direct(sound), SoundSource.PLAYERS, x, y, z, volume, pitch, seed);
+            serverPlayer.connection.send(soundPacket);
         }
 
         // update counter
