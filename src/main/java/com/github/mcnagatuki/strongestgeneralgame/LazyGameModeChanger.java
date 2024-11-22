@@ -12,6 +12,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +53,22 @@ public class LazyGameModeChange {
 
         Score score = serverScoreboard.getOrCreatePlayerScore(serverPlayer.getScoreboardName(), objective);
         score.setScore(counterSecond);
+    }
+
+    public static void cancel(ServerPlayer serverPlayer) {
+        MinecraftServer server = serverPlayer.getServer();
+        if (server == null) {
+            return;
+        }
+
+        ServerScoreboard serverScoreboard = server.getScoreboard();
+        Objective objective = serverScoreboard.getObjective(lazyCounter);
+        if (objective == null) {
+            return;
+        }
+
+        Score score = serverScoreboard.getOrCreatePlayerScore(serverPlayer.getScoreboardName(), objective);
+        score.setScore(-1);
     }
 
     @SubscribeEvent
@@ -114,5 +131,4 @@ public class LazyGameModeChange {
         // update counter
         score.setScore(counterTime - 1);
     }
-
 }
