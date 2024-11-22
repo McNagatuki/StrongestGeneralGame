@@ -3,9 +3,16 @@ package com.github.mcnagatuki.strongestgeneralgame;
 import com.mojang.logging.LogUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
@@ -35,7 +42,6 @@ public class MainLogic {
 
     // ワールド内コマンド操作用tag, このtagを通じて、コマンドの対象操作であることを伝達する。
     private static final String commandRandomTpTag = "sgg_random_tp";  // TODO: コマンド側で実装。
-    private static final String commandGeneralDeathAnnounceTag = "sgg_general_death_announce";  // TODO: コマンド側で実装
 
     // リスポーン用タグ
     private static final String respawnTpTagPrefix = "sgg_respawn_tp_";
@@ -156,7 +162,7 @@ public class MainLogic {
         List<Player> deathPlayerTeamMembers = getTeamPlayers(server, deathPlayerTeam);
 
         // 「大将が死にました」のアナウンス, MODではタグをつけるだけ
-        deathPlayerTeamMembers.forEach(e -> e.addTag(commandGeneralDeathAnnounceTag));
+        deathPlayerTeamMembers.forEach(MainLogic::announceGeneralDeath);
 
         // 死んだチームの全員スペクテイター化
         deathPlayerTeamMembers.stream()
@@ -238,6 +244,27 @@ public class MainLogic {
 
         // 死んだ場所にリスポーン, tagで操作, 続きはonPlayerRespawn
         setTpGameModeChangeTag(deathServerPlayer, respawnDeathPoint, false);
+    }
+
+    private static void announceGeneralDeath(Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+
+        Packet<?> titleTextPacketPacket = new ClientboundSetTitleTextPacket(Component.literal("大将が死にました\nチームが移ります"));
+        serverPlayer.connection.send(titleTextPacketPacket);
+
+        double x = serverPlayer.getX();
+        double y = serverPlayer.getY();
+        double z = serverPlayer.getZ();
+
+        SoundEvent sound = SoundEvents.ANVIL_PLACE;
+        float volume = 0.4F;
+        float pitch = 1.0F;
+        long seed = System.nanoTime();
+
+        Packet<?> soundPacket = new ClientboundSoundPacket(Holder.direct(sound), SoundSource.PLAYERS, x, y, z, volume, pitch, seed);
+        serverPlayer.connection.send(soundPacket);
     }
 
     private static Optional<Team> getWhichTeamKillMe(Player deathPlayer) {
