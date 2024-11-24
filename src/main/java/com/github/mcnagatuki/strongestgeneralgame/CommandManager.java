@@ -35,7 +35,9 @@ public class CommandManager {
                 .then(Commands.literal("start")
                         .executes(CommandManager::executeStart))
                 .then(Commands.literal("stop")
-                        .executes(CommandManager::executeStop)
+                        .executes(CommandManager::executeStop))
+                .then(Commands.literal("destroy")
+                        .executes(CommandManager::executeDestroy)
                 );
 
         event.getDispatcher().register(builder);
@@ -65,6 +67,16 @@ public class CommandManager {
         CommandSourceStack source = context.getSource();
         if (source.hasPermission(2) || !source.isPlayer()) {
             MainLogic.endGame(source);
+        } else {
+            source.sendFailure(Component.literal("[SGG] Permission denied."));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    public static int executeDestroy(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+        if (source.hasPermission(2) || !source.isPlayer()) {
+            MainLogic.destroy(source);
         } else {
             source.sendFailure(Component.literal("[SGG] Permission denied."));
         }

@@ -94,10 +94,20 @@ public class MainLogic {
         }
         running = false;
 
+        Supplier<Component> supplier = () -> Component.literal("[SGG] Game is stopped!");
+        source.sendSuccess(supplier, true);
+    }
+
+    public static void destroy(CommandSourceStack source) {
+        if (running) {
+            source.sendFailure(Component.literal("[SGG] Game is still running."));
+            return;
+        }
+
         MinecraftServer server = source.getServer();
         TeamManager.destroy(server);
 
-        Supplier<Component> supplier = () -> Component.literal("[SGG] Game is stopped!");
+        Supplier<Component> supplier = () -> Component.literal("[SGG] Game is destroyed!");
         source.sendSuccess(supplier, true);
     }
 
