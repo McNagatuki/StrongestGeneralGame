@@ -94,6 +94,9 @@ public class MainLogic {
         }
         running = false;
 
+        MinecraftServer server = source.getServer();
+        TeamManager.destroy(server);
+
         Supplier<Component> supplier = () -> Component.literal("[SGG] Game is stopped!");
         source.sendSuccess(supplier, true);
     }
