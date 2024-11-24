@@ -52,6 +52,7 @@ public class TeamManager {
 
             PlayerTeam playerTeam = scoreboard.addPlayerTeam(playerTeamName);
             playerTeam.setDisplayName(Component.literal(playerName));
+            playerTeam.setNameTagVisibility(Team.Visibility.HIDE_FOR_OTHER_TEAMS);
             scoreboard.addPlayerToTeam(playerName, playerTeam);
 
             playerTeam.setAllowFriendlyFire(false);
@@ -60,6 +61,7 @@ public class TeamManager {
         // 落ち武者team
         PlayerTeam fallenWarriorTeam = scoreboard.addPlayerTeam(fallenWarriorTeamName);
         fallenWarriorTeam.setDisplayName(Component.literal(fallenWarriorTeamDisplayName));
+        fallenWarriorTeam.setNameTagVisibility(Team.Visibility.HIDE_FOR_OTHER_TEAMS);
 
         // 残りチーム数の記録用スコアボード
         ServerScoreboard serverScoreboard = server.getScoreboard();
