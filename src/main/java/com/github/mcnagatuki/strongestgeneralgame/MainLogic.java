@@ -5,6 +5,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.MinecraftServer;
@@ -245,8 +246,11 @@ public class MainLogic {
             return;
         }
 
-        Packet<?> titleTextPacketPacket = new ClientboundSetTitleTextPacket(Component.literal("大将が死にました\nチームが移ります"));
+        Packet<?> titleTextPacketPacket = new ClientboundSetTitleTextPacket(Component.literal("大将が死にました"));
         serverPlayer.connection.send(titleTextPacketPacket);
+
+        Packet<?> subTitleTextPacketPacket = new ClientboundSetSubtitleTextPacket(Component.literal("チームが移ります"));
+        serverPlayer.connection.send(subTitleTextPacketPacket);
 
         double x = serverPlayer.getX();
         double y = serverPlayer.getY();
