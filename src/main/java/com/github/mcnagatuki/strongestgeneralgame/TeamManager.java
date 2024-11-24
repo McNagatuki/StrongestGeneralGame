@@ -2,15 +2,17 @@ package com.github.mcnagatuki.strongestgeneralgame;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Scoreboard;
-import net.minecraft.world.scores.Team;
+import net.minecraft.world.scores.*;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.minecraftforge.api.distmarker.Dist;
 
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
+import net.minecraftforge.event.TickEvent.ServerTickEvent;
 
 import java.util.*;
 
@@ -19,6 +21,8 @@ public class TeamManager {
     // 落ち武者チーム
     private static final String fallenWarriorTeamName = "sgg_fallen_warrior";
     private static final String fallenWarriorTeamDisplayName = "落ち武者";
+    private static final String teamLeftScore = "sgg_team_left";
+    private static final String dummyPlayerScoreboardName = "sgg_team_left";
 
     // 結果
     public enum TeamManagerResult { SUCCESS, FAILURE; }
@@ -26,18 +30,8 @@ public class TeamManager {
     public static void initialize(MinecraftServer server) {
         Scoreboard scoreboard = server.getScoreboard();
 
-        // チームの削除
-        List<String> sggTeamNames = scoreboard.getPlayerTeams()
-                .stream()
-                .map(PlayerTeam::getName)
-                .filter(e -> e.startsWith("sgg_"))
-                .toList();
-        for (String sggTeamName : sggTeamNames) {
-            PlayerTeam sggTeam = scoreboard.getPlayerTeam(sggTeamName);
-            if (sggTeam != null) {
-                scoreboard.removePlayerTeam(sggTeam);
-            }
-        }
+        // チームの削除・スコアボードの削除
+        destroy(server);
 
         // チーム作成・追加
         List<ServerPlayer> players = server.getPlayerList().getPlayers();
@@ -61,6 +55,37 @@ public class TeamManager {
         // 落ち武者team
         PlayerTeam fallenWarriorTeam = scoreboard.addPlayerTeam(fallenWarriorTeamName);
         fallenWarriorTeam.setDisplayName(Component.literal(fallenWarriorTeamDisplayName));
+
+        // 残りチーム数の記録用スコアボード
+        ServerScoreboard serverScoreboard = server.getScoreboard();
+        ObjectiveCriteria criteria = ObjectiveCriteria.DUMMY;
+        Component displayName = Component.literal("残りチーム数");
+        ObjectiveCriteria.RenderType renderType = ObjectiveCriteria.RenderType.INTEGER;
+        Objective objective = serverScoreboard.addObjective(teamLeftScore, criteria, displayName, renderType);
+        serverScoreboard.setDisplayObjective(Scoreboard.DISPLAY_SLOT_SIDEBAR, objective);
+    }
+
+    public static void destroy(MinecraftServer server) {
+        ServerScoreboard serverScoreboard = server.getScoreboard();
+
+        // チームの削除
+        List<String> sggTeamNames = serverScoreboard.getPlayerTeams()
+                .stream()
+                .map(PlayerTeam::getName)
+                .filter(e -> e.startsWith("sgg_"))
+                .toList();
+        for (String sggTeamName : sggTeamNames) {
+            PlayerTeam sggTeam = serverScoreboard.getPlayerTeam(sggTeamName);
+            if (sggTeam != null) {
+                serverScoreboard.removePlayerTeam(sggTeam);
+            }
+        }
+
+        // objectiveを削除
+        Objective objective = serverScoreboard.getObjective(teamLeftScore);
+        if (objective != null) {
+            serverScoreboard.removeObjective(objective);
+        }
     }
 
     public static boolean isPlayerInGame(@NotNull Player player) {
@@ -148,45 +173,40 @@ public class TeamManager {
     }
 
     // TODO: 「ゲーム終了時にどう攻略されたか知る」
-//    @SubscribeEvent
-//    public static void onPlayerLoggedInEvent(PlayerLoggedInEvent event) {
-//        // ゲーム中でなければ何もしない
-//        if (!MainLogic.isRunning()) {
-//            return;
-//        }
-//
-//        // 入ったプレイヤーを取得
-//        Player player = event.getEntity();
-//        String playerName = player.getName().getString();
-//
-//        // Serverのみで動作
-//        MinecraftServer server = player.getServer();
-//        if (server == null) {
-//            return;
-//        }
-//
-//        if (!(player instanceof ServerPlayer serverPlayer)) {
-//            return;
-//        }
-//
-//        Scoreboard scoreboard = server.getScoreboard();
-//        PlayerTeam playerTeam = scoreboard.getPlayersTeam(player.getName().getString());
-//        if (playerTeam == null) {
-//            return;
-//        }
-//
-//        String suffix = playerTeam.getPlayerSuffix().getString();
-//        player.sendSystemMessage(Component.literal("suffix: " + suffix));  // TODO: DEBUG
-//        if (!suffix.equals("")) {
-//            serverPlayer.setGameMode(GameType.SPECTATOR);
-//        }
-//
-//        while (!suffix.equals("")) {
-//            PlayerTeam nextPlayerTeam = scoreboard.getPlayerTeam(suffix);
-//            scoreboard.addPlayerToTeam(playerName, nextPlayerTeam);
-//            suffix = nextPlayerTeam.getPlayerSuffix().getString();
-//        }
-//    }
+    @SubscribeEvent
+    public static void onPlayerLoggedInEvent(ServerTickEvent event) {
+        MinecraftServer server = event.getServer();
+        updateTeamLeft(server);
+    }
+
+    private static void updateTeamLeft(MinecraftServer server) {
+        int numberOfTeamLeft = getNumberOfTeamLeft(server);
+
+        ServerScoreboard serverScoreboard = server.getScoreboard();
+        Objective objective = serverScoreboard.getObjective(teamLeftScore);
+        if (objective == null) {
+            return;
+        }
+
+        Score score = serverScoreboard.getOrCreatePlayerScore(dummyPlayerScoreboardName, objective);
+        score.setScore(numberOfTeamLeft);
+    }
+
+    private static int getNumberOfTeamLeft(MinecraftServer server) {
+        ServerScoreboard serverScoreboard = server.getScoreboard();
+         long numberOfTeamLeft = serverScoreboard.getPlayerTeams()
+                .stream()
+                .filter(e -> e.getName().startsWith("sgg_"))
+                .filter(e -> !e.getName().equals(fallenWarriorTeamName))
+                .filter(e -> e.getPlayers().size() > 0)
+                .count();
+
+         try {
+             return Math.toIntExact(numberOfTeamLeft);
+         } catch (Exception e) {
+             return Integer.MAX_VALUE;
+         }
+    }
 
 //        MinecraftServer server = deathPlayer.getServer();
 //        Scoreboard scoreboard = server.getScoreboard();
