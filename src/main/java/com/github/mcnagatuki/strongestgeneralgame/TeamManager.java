@@ -22,7 +22,12 @@ public class TeamManager {
     private static final String fallenWarriorTeamName = "sgg_fallen_warrior";
     private static final String fallenWarriorTeamDisplayName = "落ち武者";
     private static final String teamLeftScore = "sgg_team_left";
+    private static final String teamLeftScoreDisplayName = "残りチーム数";
     private static final String dummyPlayerScoreboardName = "sgg_team_left";
+
+    private static final String teamListScore = "sgg_team_list";
+    private static final String teamListScoreDisplayName = "チーム一覧";
+
 
     // 結果
     public enum TeamManagerResult { SUCCESS, FAILURE; }
@@ -59,10 +64,14 @@ public class TeamManager {
         // 残りチーム数の記録用スコアボード
         ServerScoreboard serverScoreboard = server.getScoreboard();
         ObjectiveCriteria criteria = ObjectiveCriteria.DUMMY;
-        Component displayName = Component.literal("残りチーム数");
         ObjectiveCriteria.RenderType renderType = ObjectiveCriteria.RenderType.INTEGER;
-        Objective objective = serverScoreboard.addObjective(teamLeftScore, criteria, displayName, renderType);
-        serverScoreboard.setDisplayObjective(Scoreboard.DISPLAY_SLOT_SIDEBAR, objective);
+
+        Component teamLeftScoreComponent = Component.literal(teamLeftScoreDisplayName);
+        Objective teamLeftScoreObjective = serverScoreboard.addObjective(teamLeftScore, criteria, teamLeftScoreComponent, renderType);
+
+        Component teamListScoreComponent = Component.literal(teamListScoreDisplayName);
+        Objective teamListScoreObjective = serverScoreboard.addObjective(teamListScore, criteria, teamListScoreComponent, renderType);
+        serverScoreboard.setDisplayObjective(Scoreboard.DISPLAY_SLOT_SIDEBAR, teamListScoreObjective);
     }
 
     public static void destroy(MinecraftServer server) {
@@ -82,9 +91,14 @@ public class TeamManager {
         }
 
         // objectiveを削除
-        Objective objective = serverScoreboard.getObjective(teamLeftScore);
-        if (objective != null) {
-            serverScoreboard.removeObjective(objective);
+        Objective teamLeftScoreObjective = serverScoreboard.getObjective(teamLeftScore);
+        if (teamLeftScoreObjective != null) {
+            serverScoreboard.removeObjective(teamLeftScoreObjective);
+        }
+
+        Objective teamListScoreObjective = serverScoreboard.getObjective(teamListScore);
+        if (teamListScoreObjective != null) {
+            serverScoreboard.removeObjective(teamListScoreObjective);
         }
     }
 
@@ -177,6 +191,7 @@ public class TeamManager {
     public static void onPlayerLoggedInEvent(ServerTickEvent event) {
         MinecraftServer server = event.getServer();
         updateTeamLeft(server);
+        updateTeamList(server);
     }
 
     private static void updateTeamLeft(MinecraftServer server) {
@@ -190,6 +205,8 @@ public class TeamManager {
 
         Score score = serverScoreboard.getOrCreatePlayerScore(dummyPlayerScoreboardName, objective);
         score.setScore(numberOfTeamLeft);
+
+
     }
 
     private static int getNumberOfTeamLeft(MinecraftServer server) {
@@ -206,6 +223,33 @@ public class TeamManager {
          } catch (Exception e) {
              return Integer.MAX_VALUE;
          }
+    }
+
+    private static void updateTeamList(MinecraftServer server) {
+        ServerScoreboard serverScoreboard = server.getScoreboard();
+        Objective objective = serverScoreboard.getObjective(teamListScore);
+        if (objective == null) {
+            return;
+        }
+
+        List<PlayerTeam> playerTeamLeft = serverScoreboard.getPlayerTeams()
+                .stream()
+                .filter(e -> e.getName().startsWith("sgg_"))
+                .filter(e -> !e.getName().equals(fallenWarriorTeamName))
+                .toList();
+
+        for (PlayerTeam playerTeam : playerTeamLeft) {
+            String name = playerTeam.getName().replace("sgg_", "");
+            int numberOfTeamMember = playerTeam.getPlayers().size();
+
+            if (numberOfTeamMember > 0) {
+                Score score = serverScoreboard.getOrCreatePlayerScore(name, objective);
+                score.setScore(numberOfTeamMember);
+            } else {
+                serverScoreboard.resetPlayerScore(name, objective);
+            }
+
+        }
     }
 
 //        MinecraftServer server = deathPlayer.getServer();
