@@ -35,7 +35,6 @@ public class TeamManager {
 
     // ログ出力
     private static final Logger logger = Logger.getLogger(TeamManager.class.getName());
-    private static boolean file_is_open = false;
 
     // 結果
     public enum TeamManagerResult { SUCCESS, FAILURE; }
