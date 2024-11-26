@@ -14,7 +14,12 @@ import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
 
+import java.io.IOException;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+
 import java.util.*;
+import java.util.logging.SimpleFormatter;
 
 @Mod.EventBusSubscriber(modid = StrongestGeneralGame.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.DEDICATED_SERVER)
 public class TeamManager {
@@ -28,6 +33,9 @@ public class TeamManager {
     private static final String teamListScore = "sgg_team_list";
     private static final String teamListScoreDisplayName = "チーム一覧";
 
+    // ログ出力
+    private static final Logger logger = Logger.getLogger(TeamManager.class.getName());
+    private static boolean file_is_open = false;
 
     // 結果
     public enum TeamManagerResult { SUCCESS, FAILURE; }
@@ -74,6 +82,19 @@ public class TeamManager {
         Component teamListScoreComponent = Component.literal(teamListScoreDisplayName);
         Objective teamListScoreObjective = serverScoreboard.addObjective(teamListScore, criteria, teamListScoreComponent, renderType);
         serverScoreboard.setDisplayObjective(Scoreboard.DISPLAY_SLOT_SIDEBAR, teamListScoreObjective);
+
+        // 移動ログの出力
+        try {
+            // ファイルにログを出力するFileHandlerの設定
+            if (logger.getHandlers().length == 0) {
+                FileHandler fileHandler = new FileHandler("team_move_log.txt", true); // trueで追記モードに
+                fileHandler.setFormatter(new SimpleFormatter()); // フォーマット設定（シンプルな形式）
+                logger.addHandler(fileHandler); // Loggerにハンドラを追加
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        logger.info("Team manager was initialized.");
     }
 
     public static void destroy(MinecraftServer server) {
@@ -145,6 +166,8 @@ public class TeamManager {
         PlayerTeam playerTeam = scoreboard.getPlayerTeam(team.getName());
         scoreboard.addPlayerToTeam(player.getName().getString(), playerTeam);
 
+        logger.info("add " + player.getName().getString() + " " + team.getName());
+
         return TeamManagerResult.SUCCESS;
     }
 
@@ -161,6 +184,8 @@ public class TeamManager {
         for (String fromTeamPlayerName : fromTeamPlayerNames){
             scoreboard.addPlayerToTeam(fromTeamPlayerName, toPlayerTeam);
         }
+
+        logger.info("move " + fromTeam.getName() + " " + toTeam.getName());
 
         return TeamManagerResult.SUCCESS;
     }
@@ -207,8 +232,6 @@ public class TeamManager {
 
         Score score = serverScoreboard.getOrCreatePlayerScore(dummyPlayerScoreboardName, objective);
         score.setScore(numberOfTeamLeft);
-
-
     }
 
     private static int getNumberOfTeamLeft(MinecraftServer server) {
