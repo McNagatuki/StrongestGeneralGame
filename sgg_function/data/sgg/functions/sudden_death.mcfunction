@@ -1,0 +1,1 @@
+fill 113 315 -1023 126 315 -1010 minecraft:stone replace
