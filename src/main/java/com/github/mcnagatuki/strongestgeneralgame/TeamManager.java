@@ -214,7 +214,7 @@ public class TeamManager {
 
     // TODO: 「ゲーム終了時にどう攻略されたか知る」
     @SubscribeEvent
-    public static void onPlayerLoggedInEvent(ServerTickEvent event) {
+    public static void onServerTickEvent(ServerTickEvent event) {
         MinecraftServer server = event.getServer();
         updateTeamLeft(server);
         updateTeamList(server);
