@@ -1,0 +1,1 @@
+title @a actionbar [{"score":{"name":"sgg_timer","objective":"sgg_timer_m"},"color":"gray"},{"text":"分"},{"score":{"name":"sgg_timer","objective":"sgg_timer_s"}},{"text":"秒"}]
