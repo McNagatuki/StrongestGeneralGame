@@ -211,8 +211,7 @@ public class TeamManager {
         Scoreboard scoreboard = server.getScoreboard();
         return scoreboard.getPlayerTeam(fallenWarriorTeamName);
     }
-
-    // TODO: 「ゲーム終了時にどう攻略されたか知る」
+    
     @SubscribeEvent
     public static void onServerTickEvent(ServerTickEvent event) {
         MinecraftServer server = event.getServer();
