@@ -169,9 +169,6 @@ public class MainLogic {
         // 死んだチームのメンバーを列挙
         List<Player> deathPlayerTeamMembers = getTeamPlayers(server, deathPlayerTeam);
 
-        // 「大将が死にました」のアナウンス, MODではタグをつけるだけ
-        deathPlayerTeamMembers.forEach(MainLogic::announceGeneralDeath);
-
         // 死んだチームの全員スペクテイター化
         deathPlayerTeamMembers.stream()
                 .filter(e -> e instanceof ServerPlayer)
@@ -181,6 +178,9 @@ public class MainLogic {
         /* 死因がSGGプレイヤーによるものではない場合
            あるいは、殺したチームが死んだチームと同じ場合（自殺？や相打ち） */
         if (killerTeam.isEmpty() || killerTeam.get().getName().equals(deathPlayerTeam.getName())) {
+            // 「大将が死にました」のアナウンス
+            deathPlayerTeamMembers.forEach(MainLogic::announceGeneralDeathToFallenWarrior);
+
             // チームの全プレイヤーを落ち武者化
             TeamManager.moveTeamToFallenWarrior(server, deathPlayerTeam);
 
@@ -204,6 +204,9 @@ public class MainLogic {
         }
 
         /* 以下、死因がSGGプレイヤーによる場合*/
+        // 「大将が死にました」のアナウンス
+        deathPlayerTeamMembers.forEach(MainLogic::announceGeneralDeath);
+
         // 大将を殺したプレイヤーのチームにチーム変更
         TeamManager.moveTeamToTeam(server, deathPlayerTeam, killerTeam.get());
 
@@ -252,6 +255,30 @@ public class MainLogic {
 
         // 死んだ場所にリスポーン, tagで操作, 続きはonPlayerRespawn
         setTpGameModeChangeTag(deathServerPlayer, respawnDeathPoint, false);
+    }
+
+    private static void announceGeneralDeathToFallenWarrior(Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+
+        Packet<?> titleTextPacketPacket = new ClientboundSetTitleTextPacket(Component.literal("大将が事故死しました"));
+        serverPlayer.connection.send(titleTextPacketPacket);
+
+        Packet<?> subTitleTextPacketPacket = new ClientboundSetSubtitleTextPacket(Component.literal("落ち武者になります"));
+        serverPlayer.connection.send(subTitleTextPacketPacket);
+
+        double x = serverPlayer.getX();
+        double y = serverPlayer.getY();
+        double z = serverPlayer.getZ();
+
+        SoundEvent sound = SoundEvents.BELL_BLOCK;
+        float volume = 0.4F;
+        float pitch = 0.5F;
+        long seed = System.nanoTime();
+
+        Packet<?> soundPacket = new ClientboundSoundPacket(Holder.direct(sound), SoundSource.PLAYERS, x, y, z, volume, pitch, seed);
+        serverPlayer.connection.send(soundPacket);
     }
 
     private static void announceGeneralDeath(Player player) {
