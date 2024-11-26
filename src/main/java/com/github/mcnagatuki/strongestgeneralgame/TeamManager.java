@@ -1,10 +1,16 @@
 package com.github.mcnagatuki.strongestgeneralgame;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeableArmorItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.scores.*;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.minecraftforge.api.distmarker.Dist;
@@ -63,6 +69,9 @@ public class TeamManager {
             scoreboard.addPlayerToTeam(playerName, playerTeam);
 
             playerTeam.setAllowFriendlyFire(false);
+
+            // 大将の目印となる赤い帽子を被せる
+            setGeneralHelmet(player);
         }
 
         // 落ち武者team
@@ -165,6 +174,8 @@ public class TeamManager {
         PlayerTeam playerTeam = scoreboard.getPlayerTeam(team.getName());
         scoreboard.addPlayerToTeam(player.getName().getString(), playerTeam);
 
+        checkHelmet(player);
+
         logger.info("add " + player.getName().getString() + " " + team.getName());
 
         return TeamManagerResult.SUCCESS;
@@ -183,6 +194,9 @@ public class TeamManager {
         for (String fromTeamPlayerName : fromTeamPlayerNames){
             scoreboard.addPlayerToTeam(fromTeamPlayerName, toPlayerTeam);
         }
+
+        // check helmet, 面倒くさいのでサーバーにいる全プレイヤーを確認
+        server.getPlayerList().getPlayers().stream().forEach(TeamManager::checkHelmet);
 
         logger.info("move " + fromTeam.getName() + " " + toTeam.getName());
 
@@ -211,7 +225,7 @@ public class TeamManager {
         Scoreboard scoreboard = server.getScoreboard();
         return scoreboard.getPlayerTeam(fallenWarriorTeamName);
     }
-    
+
     @SubscribeEvent
     public static void onServerTickEvent(ServerTickEvent event) {
         MinecraftServer server = event.getServer();
@@ -271,8 +285,52 @@ public class TeamManager {
             } else {
                 serverScoreboard.resetPlayerScore(name, objective);
             }
-
         }
+    }
+
+    public static void checkHelmet(Player player) {
+        if (isPlayerGeneral(player)) {
+            setGeneralHelmet(player);
+        } else {
+            removeGeneralHelmet(player);
+        }
+    }
+
+    public static void setGeneralHelmet(Player player) {
+        ItemStack redLeatherHelmet = new ItemStack(Items.LEATHER_HELMET);
+        redLeatherHelmet.enchant(Enchantments.BINDING_CURSE, 1);
+
+        CompoundTag tag = redLeatherHelmet.getOrCreateTag();
+        tag.putBoolean("Unbreakable", true);
+        tag.putBoolean("HideFlags", true);
+
+        // red
+        if (redLeatherHelmet.getItem() instanceof DyeableArmorItem redLeatherHelmetDyeable) {
+            redLeatherHelmetDyeable.setColor(redLeatherHelmet, 16711680);
+        }
+
+        player.getInventory().armor.set(EquipmentSlot.HEAD.getIndex(), redLeatherHelmet);
+    }
+
+    public static void removeGeneralHelmet(Player player) {
+        ItemStack currentHelmet = player.getInventory().armor.get(EquipmentSlot.HEAD.getIndex());
+
+        // 革の帽子を装備していなければ何もしない
+        if (!currentHelmet.getItem().equals(Items.LEATHER_HELMET)) {
+            return;
+        }
+
+        // 赤色の帽子でなければ何もしない
+        if (!(currentHelmet.getItem() instanceof DyeableArmorItem currentHelmetDyeable)) {
+            return;
+        }
+
+        if (currentHelmetDyeable.getColor(currentHelmet) != 16711680){
+            return;
+        }
+
+        // ヘルメットを脱がせる（スロットを空にする）
+        player.getInventory().armor.set(EquipmentSlot.HEAD.getIndex(), ItemStack.EMPTY);
     }
 
 //        MinecraftServer server = deathPlayer.getServer();
