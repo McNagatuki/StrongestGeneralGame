@@ -205,7 +205,8 @@ public class MainLogic {
 
         /* 以下、死因がSGGプレイヤーによる場合*/
         // 「大将が死にました」のアナウンス
-        deathPlayerTeamMembers.forEach(MainLogic::announceGeneralDeath);
+        String killerTeamName = killerTeam.get().getName();
+        deathPlayerTeamMembers.forEach(e -> announceGeneralDeath(e, killerTeamName));
 
         // 大将を殺したプレイヤーのチームにチーム変更
         TeamManager.moveTeamToTeam(server, deathPlayerTeam, killerTeam.get());
@@ -281,7 +282,7 @@ public class MainLogic {
         serverPlayer.connection.send(soundPacket);
     }
 
-    private static void announceGeneralDeath(Player player) {
+    private static void announceGeneralDeath(Player player, String newTeamName) {
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return;
         }
@@ -289,7 +290,8 @@ public class MainLogic {
         Packet<?> titleTextPacketPacket = new ClientboundSetTitleTextPacket(Component.literal("大将が死にました"));
         serverPlayer.connection.send(titleTextPacketPacket);
 
-        Packet<?> subTitleTextPacketPacket = new ClientboundSetSubtitleTextPacket(Component.literal("チームが移ります"));
+        newTeamName = newTeamName.replace("sgg_", "");
+        Packet<?> subTitleTextPacketPacket = new ClientboundSetSubtitleTextPacket(Component.literal("チーム" + newTeamName + "に移ります"));
         serverPlayer.connection.send(subTitleTextPacketPacket);
 
         double x = serverPlayer.getX();
