@@ -1,9 +1,6 @@
 # コマンド実行ログ非表示
 gamerule sendCommandFeedback false
 
-# MOD 初期化
-sgg initialize
-
 # タイマー初期化
 function sgg:timer/initialize
 
@@ -14,6 +11,9 @@ function sgg:area/area0
 clear @a[team=!ignore]
 give @a[team=!ignore] minecraft:cooked_beef 64
 give @a[team=!ignore] minecraft:wooden_pickaxe
+
+# MOD 初期化
+sgg initialize
 
 # フェーズ
 scoreboard players set sgg_phase sgg_phase 1
