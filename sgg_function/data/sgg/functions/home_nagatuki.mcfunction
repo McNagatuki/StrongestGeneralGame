@@ -1,0 +1,1 @@
+tp Naga2ki @e[name="house",limit=1]
