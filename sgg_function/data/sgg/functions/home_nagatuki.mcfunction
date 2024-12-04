@@ -1,1 +1,1 @@
-tp Naga2ki @e[name="house",limit=1]
+tp Nagatuki @e[name="house",limit=1]
