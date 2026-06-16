@@ -4,7 +4,7 @@ sgg stop
 
 # アナウンス
 title @a title "ゲームを中止します"
-playsound minecraft:block.anvil.destroy player @a ~ ~ ~ 1 1
+execute as @a at @s run playsound minecraft:block.anvil.destroy player @a ~ ~ ~ 1 1
 
 # フェーズ
 scoreboard players set sgg_phase sgg_phase 3

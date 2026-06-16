@@ -4,7 +4,7 @@ sgg stop
 
 # アナウンス
 title @a title "ゲーム終了！"
-playsound minecraft:block.anvil.use player @a ~ ~ ~ 1 1
+execute as @a at @s run playsound minecraft:block.anvil.use player @a ~ ~ ~ 1 1
 
 # フェーズ
 scoreboard players set sgg_phase sgg_phase 3
