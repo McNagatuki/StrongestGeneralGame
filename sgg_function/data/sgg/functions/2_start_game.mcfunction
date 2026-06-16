@@ -1,8 +1,8 @@
 # MOD スタート
 sgg start
 
-# random tp
-tag @a[team=!ignore] add sgg_random_tp
+# タイマー初期化
+function sgg:timer/initialize
 
 # ゲームモード変更
 gamemode survival @a[team=!ignore]
