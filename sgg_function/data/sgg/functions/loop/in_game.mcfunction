@@ -18,7 +18,8 @@ effect give @a[team=sgg_fallen_warrior] minecraft:weakness 2 255 true
 effect give @a[team=sgg_fallen_warrior] minecraft:glowing 2 255 true
 
 # 高さ制限の処理
-# effect give @a[tag=sgg_height_warning] 
+execute if score sgg_area sgg_area matches 4 if score sgg_timer sgg_timer_tick matches 0 run function sgg:height/height
+execute if score sgg_area sgg_area matches 5 if score sgg_timer sgg_timer_tick matches 0 run function sgg:height/height
 
 # random tpの処理
 function sgg:map/random_tp

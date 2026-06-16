@@ -15,6 +15,9 @@ team add ignore
 scoreboard objectives add sgg_phase dummy
 scoreboard players set sgg_phase sgg_phase 0
 
+# 高さ制限
+function sgg:height/setup
+
 # ゲームルール
 gamerule commandBlockOutput false
 gamerule keepInventory true
